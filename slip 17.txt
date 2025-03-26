@@ -1,0 +1,301 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+typedef struct IndexBlock
+{
+    int *arr;
+} IndexBlock;
+
+typedef struct List
+{
+    char name[10];
+    IndexBlock *block;
+    int noe;
+} List;
+
+void showbitvector(int block[], int n)
+{
+    printf("\nBit Vector: \n");
+    int i;
+    for (i = 0; i < n; i++)
+        printf("%d", block[i]);
+    printf("\n\n");
+}
+
+void deletefile(int bitv[], int n, List directory[])
+{
+    char name[10];
+    int i;
+    printf("Enter file name: ");
+    scanf(" %s", &name);
+
+    // check if file exist in the directory
+    int loc = -1;
+    for (i = 0; i < n; i++)
+    {
+        if (strcmp(directory[i].name, name) == 0)
+        {
+            loc = i;
+            break;
+        }
+    }
+    if (loc == -1)
+    {
+        printf("File not found\n\n");
+        return;
+    }
+
+    // free up the bit vector
+    int *arr = directory[loc].block->arr;
+    int noe = directory[loc].noe;
+
+    while (noe > 0)
+    {
+        bitv[*arr] = 1;
+        arr++;
+        noe--;
+    }
+
+    // free up the directory entry
+    directory[loc].block = NULL;
+    directory[loc].noe = -1;
+
+    printf("File Deleted\n\n");
+}
+
+void createnewfile(int bitv[], int n, List directory[])
+{
+    int i;
+    char name[10];
+    int nob = 4;
+    printf("Enter file name: ");
+    scanf(" %s", &name);
+
+    printf("Enter number of blocks: ");
+    scanf(" %d", &nob);
+
+    // check if there are free blocks
+    int temp = nob;
+    for (i = 0; i < n; i++)
+    {
+        if (bitv[i] == 1)
+        {
+            temp--;
+            if (temp == 0)
+                break;
+        }
+    }
+    if (temp != 0)
+    {
+        printf("Memory full \n\n");
+        return;
+    }
+    // // find out the indexes where there are free block's.
+    int counter = 0;
+    int index[nob];
+    for (i = 0; i < n; i++)
+    {
+        if (bitv[i] == 1)
+        {
+            index[counter] = i;
+            counter++;
+            if (counter == nob)
+                break;
+        }
+    }
+
+    // // filling the bit vector
+    for (i = 0; i < nob; i++)
+    {
+        bitv[index[i]] = 0;
+    }
+
+    // creating the index block
+    int *start = (int *)malloc(sizeof(int) * nob);
+    int *tempp = start;
+    for (i = 0; i < nob; i++)
+    {
+        *tempp = index[i];
+        tempp++;
+    }
+    IndexBlock *block = (IndexBlock *)malloc(sizeof(IndexBlock));
+    block->arr = start;
+
+    // finding if the directory is full
+    int space = -1;
+    for (i = 0; i < n; i++)
+    {
+        if (directory[i].noe == -1)
+        {
+            space = i;
+            break;
+        }
+    }
+    if (space == -1)
+    {
+        printf("Directory full!!\n\n");
+        return;
+    }
+
+    strcpy(directory[space].name, name);
+    directory[space].noe = nob;
+    directory[space].block = block;
+
+    printf("File Created\n\n");
+}
+
+void showdirectory(List directory[], int n)
+{
+    int i;
+    int found = 0;
+    for (i = 0; i < n; i++)
+    {
+        if (directory[i].noe != -1)
+        {
+            printf("File Name: %s\nNumber of blocks: %d\nIndexBlock: %d\n\n", directory[i].name, directory[i].noe, directory[i].block);
+            found = 1;
+        }
+    }
+    if (found == 0)
+    {
+        printf("Directory Empty\n");
+    }
+}
+
+int main()
+{
+    int n = 10;
+    int i;
+    printf("Enter number of blocks: ");
+    scanf(" %d", &n);
+    List directory[n];
+    int bitv[n];
+    for (i = 0; i < n; i++)
+    {
+        bitv[i] = 1;
+        directory[i].noe = -1;
+    }
+    int r = 1;
+    while (r == 1)
+    {
+        printf("1. Show Bit Vector\n2. Create New File\n3. Show Directory\n4. Delete File\n5. Exit\n\n");
+        int c;
+        printf("-> ");
+        scanf(" %d", &c);
+        switch (c)
+        {
+        case 1:
+            showbitvector(bitv, n);
+            break;
+        case 2:
+            createnewfile(bitv, n, directory);
+            break;
+        case 3:
+            showdirectory(directory, n);
+            break;
+        case 4:
+            deletefile(bitv, n, directory);
+            break;
+        case 5:
+            r = 0;
+            break;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Q2
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+int RQ[100],i,j,n,TotalHeadMoment=0,initial,size,move;
+printf("Enter the number of Requests\n");
+scanf("%d",&n);
+printf("Enter the Requests sequence\n");
+for(i=0;i<n;i++)
+scanf("%d",&RQ[i]);
+printf("Enter initial head position\n");
+scanf("%d",&initial);
+printf("Enter the head movement direction for high 1 and for low 0\n");
+scanf("%d",&move);
+for(i=0;i<n;i++)
+
+{
+for(j=0;j<n-i-1;j++)
+{
+if(RQ[j]>RQ[j+1])
+{
+int temp;
+temp=RQ[j];
+RQ[j]=RQ[j+1];
+RQ[j+1]=temp;
+}
+}
+}
+int index;
+for(i=0;i<n;i++)
+{
+if(initial<RQ[i])
+{
+index=i;
+break;
+}
+}
+// if movement is towards high value
+if(move==1)
+{
+for(i=index;i<n;i++)
+{
+TotalHeadMoment=TotalHeadMoment+abs(RQ[i]-initial);
+initial=RQ[i];
+}
+for(i=index-1;i>=0;i--)
+{
+TotalHeadMoment=TotalHeadMoment+abs(RQ[i]-initial);
+initial=RQ[i];
+}
+}
+// if movement is towards low value
+else
+{
+for(i=index-1;i>=0;i--)
+{
+TotalHeadMoment=TotalHeadMoment+abs(RQ[i]-initial);
+initial=RQ[i];
+}
+
+for(i=index;i<n;i++)
+{
+TotalHeadMoment=TotalHeadMoment+abs(RQ[i]-initial);
+initial=RQ[i];
+}
+}
+printf("Total head movement is %d",TotalHeadMoment);
+return 0;
+}
